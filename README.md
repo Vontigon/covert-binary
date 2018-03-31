@@ -2,9 +2,8 @@
 Messages are hidden in the file/directory permissions
 
 TODO:
-
- X 1) Incorporate binary translation functionality into separator.py
-   2) Create a linux-terminal-friendly version of separate.py (more flags, less fluff)
+  1)X Incorporate binary translation functionality into separator.py
+  2) Create a linux-terminal-friendly version of separate.py (more flags, less fluff)
     
 As of now, the Covert.py and separator.py are standalone, and are intended to remain so.
 
