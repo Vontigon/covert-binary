@@ -18,7 +18,7 @@ USER = "anonymous" #FTP username
 PASS = "" #FTP password
 DIR = "/10" #Change to whatever directory you want to capture
 
-#-----------Decoding function----------------------------------------------------------
+#-----------Decoding function-----------------------------------------------------------
 def decode(permissions):
     message = ""
     #Tranforms string of permissions into binary string
@@ -32,7 +32,7 @@ def decode(permissions):
     print ''.join(chr(int(message[i*7:i*7+7],2)) for i in range(len(message)//7)) #7 bit binary
     #print(''.join(chr(int(message[i*8:i*8+8],2)) for i in range(len(message)//8))) #Might be unnecessary
 
-#------------Main-----------------------------------------------------------------------
+#------------Main------------------------------------------------------------------------
 #ftp -n negates auto-login, allowing us to login via program
 ftp = subprocess.Popen(["ftp", "-n", "%s" % HOST],
                        stdin=subprocess.PIPE,
