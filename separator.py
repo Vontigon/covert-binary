@@ -8,7 +8,21 @@ Madison Gay 3/30/2018
 import sys
 
 infile = sys.stdin
-binary = infile.readline().replace(" ","")
+binary = infile.readline()
+if(binary[0] == '0' or binary[0] == '1'):   #Currently does not support ASCII text beginning with 0 or 1
+    bintext = bintext.replace(" ","")
+    #print("Binary input detected!\n")
+    #print("Binary decoded in utf-8:")
+    #print(''.join(chr(int(binary[i*8:i*8+8],2)) for i in range(len(binary)//8)))    #Binary --> ASCII in utf-8
+    #print("Binary deoded in utf-7:")
+    #print(''.join(chr(int(binary[i*7:i*7+7],2)) for i in range(len(binary)//7)))    #Binary --> ASCII in utf-7
+else:
+    print("ASCII input detected!\n")
+    #print("ASCII encoded to utf-8 binary: ")
+    #print(''.join([bin(ord(c))[2:].rjust(8,'0') for c in binary])) #ASCII --> Binary in utf-8
+    #print("ASCII encoded to utf-7 binary: ")
+    binary = (''.join([bin(ord(c))[2:].rjust(7,'0') for c in binary])) #ASCII --> Binary in utf-7
+    #print()
 
 
 def sevenChunk(text):
