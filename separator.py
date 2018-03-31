@@ -9,68 +9,38 @@ import sys
 
 infile = sys.stdin
 binary = infile.readline()
-if(binary[0] == '0' or binary[0] == '1'):   #Currently does not support ASCII text beginning with 0 or 1
-    bintext = bintext.replace(" ","")
-    #print("Binary input detected!\n")
-    #print("Binary decoded in utf-8:")
-    #print(''.join(chr(int(binary[i*8:i*8+8],2)) for i in range(len(binary)//8)))    #Binary --> ASCII in utf-8
-    #print("Binary deoded in utf-7:")
-    #print(''.join(chr(int(binary[i*7:i*7+7],2)) for i in range(len(binary)//7)))    #Binary --> ASCII in utf-7
-else:
-    print("ASCII input detected!\n")
-    #print("ASCII encoded to utf-8 binary: ")
-    #print(''.join([bin(ord(c))[2:].rjust(8,'0') for c in binary])) #ASCII --> Binary in utf-8
-    #print("ASCII encoded to utf-7 binary: ")
-    binary = (''.join([bin(ord(c))[2:].rjust(7,'0') for c in binary])) #ASCII --> Binary in utf-7
-    #print()
 
-
+#-------Binary --> 7 bit chunks------------------------------------------------------
 def sevenChunk(text):
     output = ""
-    for i in range(0,len(text),7):
+    for i in range(0,len(text),7): #Almost comes pre-chunked
         output += text[i:i+7]
         output += " "
     return output
 
-
+#-------7 bit chunks --> instructions------------------------------------------------
 def sevenInstr(line):
     print("\n--------Here are the generated file commands to use in the terminal--------\n")
     for i in range(len(line)):
-        filecount = str(i).zfill(3)
-        num = line[i]
-        if num[0] == "0":
-            numpart1 = "0"
+        filecount = str(i).zfill(3) #Supports files up to file 999 (or course you can manually rename them later
+        num = line[i] #Just so I didn't have to do annoying tuple things
+        if num[0] == "0": #sevenChunk() takes away the first 3 bits, so we only work with the 3rd bit of the userperms
+            numpart1 = "000"
         else:
-            numpart1 = "1"
-        numpart2 = num[1] + num[2] + num[3]
+            numpart1 = "001"
+        numpart2 = num[1] + num[2] + num[3] #Easier way to do this but whatevs
         numpart3 = num[4] + num[5] + num[6]
         userperm = cipher(numpart1)
         groupperm = cipher(numpart2)
         otherperm = cipher(numpart3)
-        print("sudo touch file%s" % filecount)
+        print("sudo touch file%s" % filecount) #7 split will always be a file so no mkdir
         print("sudo chmod %d%d%d file%s\n" % (userperm, groupperm, otherperm, filecount))
+        
     print("# You can also make additional 'noise' files for clutter.")
     print("# All directories and any file with user permissions > 1 are ignored.")
 
 
-def tenInstr(line):
-    print("\n--------Here are the generated file commands to use in the terminal--------\n")
-    for i in range(len(line)):
-        filecount = str(i).zfill(3)
-        num = line[i]
-        numpart1 = num[1] + num[2] + num[3]
-        numpart2 = num[4] + num[5] + num[6]
-        numpart3 = num[7] + num[8] + num[9]
-        userperm = cipher(numpart1)
-        groupperm = cipher(numpart2)
-        otherperm = cipher(numpart3)
-        if line[i][0] == "1":
-            print("sudo mkdir file%s" % filecount)
-        else:
-            print("sudo touch file%s" % filecount)
-        print("sudo chmod %d%d%d file%s\n" % (userperm, groupperm, otherperm, filecount))
-
-
+#-------10 bit chunks --> Instructions------------------------------------------------
 def tenChunk(text):
     output = ""
     for i in range(0,len(text),10):
@@ -84,6 +54,27 @@ def tenChunk(text):
     return output
 
 
+#-------Binary --> 10 bit chunks-----------------------------------------------------
+def tenInstr(line):
+    print("\n--------Here are the generated file commands to use in the terminal--------\n")
+    for i in range(len(line)):
+        filecount = str(i).zfill(3)
+        num = line[i]
+        numpart1 = num[1] + num[2] + num[3]
+        numpart2 = num[4] + num[5] + num[6]
+        numpart3 = num[7] + num[8] + num[9]
+        userperm = cipher(numpart1)
+        groupperm = cipher(numpart2)
+        otherperm = cipher(numpart3)
+        if line[i][0] == "1": #Checks first bit of the perms, which is technically not a perm (-, d, or l)
+            print("sudo mkdir file%s" % filecount)
+        else:
+            print("sudo touch file%s" % filecount)
+        print("sudo chmod %d%d%d file%s\n" % (userperm, groupperm, otherperm, filecount))
+        
+
+#-------Quick translate dictionary-----------------------------------------------------
+#So I wouldn't have to worry about making ANOTHER binary converter
 def cipher(x):
     cipher = {
         '000' : 0,
@@ -93,16 +84,21 @@ def cipher(x):
         '100' : 4,
         '101' : 5,
         '110' : 6,
-        '111' : 7,
-        '1' : 1,
-        '0' : 0
+        '111' : 7
     }.get(x, 404)   #Returns 404 if x is not found within the dictionary
     return cipher
 
-
+#-------Main----------------------------------------------------------------------------
+#ASCII --> binary or just binary input
+if(binary[0] == '0' or binary[0] == '1'):   #Currently does not support ASCII text beginning with 0 or 1
+    binary = binary.replace(" ","") #Just in case
+else:
+    binary = (''.join([bin(ord(c))[2:].rjust(7,'0') for c in binary])) #ASCII --> Binary in utf-7
+#INPUT
 res = input("Do you want 7 bit or 10 bit chunks?\n")
 res.lower()
-while True:
+#Checks all cases
+while True: #Loops until exit
     if res == "7" or res == "seven":
         sep = sevenChunk(binary).split()
         sevenInstr(sep)
